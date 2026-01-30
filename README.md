@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 data = pd.read_csv("Placement_Data.csv")
 
-X = data[["ssc_p", "hsc_p", "degree_p"]]  # example features
+X = data[["ssc_p", "hsc_p", "degree_p"]] 
 y = data["status"].map({"Not Placed": 0, "Placed": 1}).values
 
 X_train, X_test, y_train, y_test = train_test_split(
