@@ -21,56 +21,63 @@ Program to implement the the Logistic Regression Model to Predict the Placement 
 Developed by: Tanushree G
 RegisterNumber:  212225040462
 */
-import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-data = pd.read_csv("Placement_Data.csv")
+data = pd.read_csv("Placement_Data.csv")   
 
-X = data[["ssc_p", "hsc_p", "degree_p"]] 
-y = data["status"].map({"Not Placed": 0, "Placed": 1}).values
+print("Dataset Preview:")
+print(data.head())
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
-)
+data = data.drop(["sl_no", "salary"], axis=1)
+
+data["status"] = data["status"].map({"Placed": 1, "Not Placed": 0})
+
+X = data.drop("status", axis=1)
+y = data["status"]
+
+X = pd.get_dummies(X, drop_first=True)
+
+print("\nAfter Encoding:")
+print(X.head())
 
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+X_scaled = scaler.fit_transform(X)
 
-model = LogisticRegression()
-model.fit(X_train_scaled, y_train)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
 
-y_pred = model.predict(X_test_scaled)
-y_proba = model.predict_proba(X_test_scaled)[:,1] 
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
 
-plt.figure(figsize=(8,5))
-plt.scatter(range(len(y_test)), y_test, color='red', label='Actual Status')
-plt.scatter(range(len(y_test)), y_proba, color='blue', marker='x', label='Predicted Probability')
-plt.xlabel("Test Samples")
-plt.ylabel("Placement Status / Probability")
-plt.title("Logistic Regression: Actual vs Predicted Probabilities")
-plt.legend()
-plt.grid(True)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix - Placement Prediction")
 plt.show()
-
-new_student = np.array([[70, 65, 75]])
-new_student_scaled = scaler.transform(new_student)
-placement_prob = model.predict_proba(new_student_scaled)[:,1]
-placement_status = model.predict(new_student_scaled)
-
-print("\nNew Student Prediction:")
-print("Probability of Placement:", round(placement_prob[0],2))
-print("Predicted Status:", "Placed" if placement_status[0]==1 else "Not Placed")
 
 ```
 
 ## Output:
-<img width="831" height="622" alt="image" src="https://github.com/user-attachments/assets/ff40e701-6a43-4999-a2e7-92daa0939427" />
+<img width="762" height="731" alt="image" src="https://github.com/user-attachments/assets/18ef7203-f0ee-4bff-bef8-12ef1b724389" />
+<img width="846" height="737" alt="image" src="https://github.com/user-attachments/assets/b9c8e909-df7e-43b2-a04d-8264b5690938" />
+
 
 
 
